@@ -110,77 +110,78 @@ function fileExtension {
 # #aks user for number of loops
 read -p "How many files would you like to create? " END
 
-# dir=$(pwd)/testfiles/
-# echo -n "By default, files will be created in:" $dir
-# read directory
-# echo $directory
-read -p "By default, this script will create folder "testfiles" in directory $(pwd). Do you want to change it? (Y/n) "
-[ -z "${var}" ] && var='$(pwd)/testfiles/'
-$var
-# echo "By default, files will be created in:" $dir
-# echo "Would you like to change the directory? (y/N)"
 
-# echo -n "Would you like to change the output directory? (y/N) "
-# read dir
-# #TODO: append eicar test string into file (using >> filename.ext?)
-# echo "Do you want these files to look like viruses s(using Eicar test string)?"
-# read eicar
-# # Eicar test string
-# # X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+echo 'By default, this script will create the folder "testfiles" in directory' $(pwd) \n
+
+# TODO: allow user to change the path
+  # echo ""
+  # echo $(pwd)
+  # echo ""
+  # read -e -p 'Enter new path, or else hit ENTER: ' dir
+  # [ -z "${dir}" ] && dir=$(pwd)
+
+# create folder for testfiles
+if [[ ! -d "testfiles" ]]
+  then
+    mkdir -v testfiles
+    echo \n
+fi
+# pause before creating the files
 
 
+
+# append eicar test string into file
+
+read -r -p "Do you want these files to look like viruses (using eicar test string)? (y/n)" response
+
+if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]
+then
+    eicar=1
+else
+    eicar=0
+fi
+
+# sleep 1
 
 ######################
 ### GENERATE FILES ###
 ######################
 
+# Create output log
+  echo  "GENERATE TEST FILES" $(date) >> testfiles/_output.txt
 
+  if [[ $eicar == 1 ]]
+  then
+    echo "Files contain eicar Test string" >> testfiles/_output.txt
+  fi
+
+  echo "--------------------------------------"
+
+# Write files
+
+# TODO: for some reason this 2 files are created when $END=0, and the eicar string is not inserted into the file with data.
 for i in $(seq 1 $END)
-do
- :
-# generate random filesize(KB) in range 2000-10000
+  do
+    :
+    # generate random filesize(KB) in range 2000-10000
+    filename=$(rpw)_$(rpw)$(fileExtension)
 
-  dd if=/dev/urandom bs=1 count=$(randomNumber 2000 7000) of=$dir $(rpw)$(fileExtension) >/dev/null 2>&1
+    # writing blocks with /dev/urandom seemed to cause issues with the eicar string
+    dd if=/dev/zero bs=$(randomNumber 2000 7000) count=1 of=testfiles/$filename >/dev/null 2>&1
 
-  echo "testfiles/$(rpw)$(fileExtension)"
+    # append eicar test to newly created file
+    if [[ $eicar == 1 ]]
+    then
+      # for some reason Metascan responds better to a file that was not written by DD &shrug;
+      echo 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' >> testfiles/$filename
+    fi
 
+    # Add filename to the output log
+    echo "testfiles/$(rpw)$(fileExtension)" >> testfiles/_output.txt
+
+# TODO: loading bar?
 done
 
+echo "DONE"
+echo $END "Test files have been generated"
 
-
-
-
-
-# i=1
-# # loop through and create files
-# while [ $i -le $end ];
-#   do createFileExtension;
-#   echo $fileExt;
-#   i=$(($i + 1))
-# done
-
-# # append files with Eicar test
-# for i in {1..3}; do
-#   filename=file$i.txt
-#   dd if=/dev/urandom bs=1 count=20 of=$filename
-#   sed -i "1 a\ this would be EICAR test" $filename
-#   cat $filename
-# done
-
-
-# # Generate random pronouncable words
-#   # http://planetozh.com/blog/2012/10/generate-random-pronouceable-words/
-
-
-
-
-
-# function createLogFile {
-#   array=(things might actually work out)
-
-#   for i in "${array[@]}"
-#     do
-#       :
-#       echo $i >> output.txt
-#   done
-# }
