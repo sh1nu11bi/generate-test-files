@@ -166,16 +166,21 @@ for i in $(seq 1 $END)
     # generate random filesize(KB) in range 2000-10000
     filename=$(rpw)_$(rpw)$(fileExtension)
 
-    # writing blocks with /dev/urandom seemed to cause issues with the eicar string
-    dd if=/dev/zero bs=$(randomNumber 2000 7000) count=1 of=testfiles/$filename >/dev/null 2>&1
+    # dd if=/dev/zero bs=$(randomNumber 2000 7000) count=1 of=testfiles/$filename >/dev/null 2>&1
+
+    ## Originally, DD would write the file here, but AV engines wouldn't recognize the eicar test string when appended to a file that had anything else in it
+    ## this issue occured with both /dev/urandom and /dev/zero
 
     # append eicar test to newly created file
     if [[ $eicar == 1 ]]
     then
       # for some reason Metascan responds better to a file that was not written by DD &shrug;
       echo 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' >> testfiles/$filename
-    fi
 
+    else
+      # generate random filesize(KB) in range 2000-10000
+      dd if=/dev/zero bs=$(randomNumber 2000 7000) count=1 of=testfiles/$filename >/dev/null 2>&1
+    fi
     # Add filename to the output log
     echo "testfiles/$(rpw)$(fileExtension)" >> testfiles/_output.txt
 
